@@ -1,0 +1,46 @@
+name: iac
+description: A new Flutter project.
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=2.12.0-0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  bloc: ^7.0.0
+  flutter_bloc: ^7.0.0
+  intl: ^0.17.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  bloc_test: ^8.0.0
+  mocktail: ^0.1.0
+  very_good_analysis: ^2.0.0
+  flutter_launcher_icons: "^0.8.0"
+  cloud_firestore: ^2.1.0
+  firebase_auth: ^1.1.4
+  flutter_calendar_carousel: ^2.0.1
+
+
+
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "images/logo.png"
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - images/
+
+  fonts:
+    - family: Google-Sans
+      fonts:
+        - asset: fonts/Google-Sans-Bold.ttf
