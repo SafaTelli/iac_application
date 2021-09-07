@@ -5,6 +5,7 @@ import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart'
     show CalendarCarousel;
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/classes/event_list.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CalendarPage extends StatefulWidget {
   @override
@@ -14,13 +15,13 @@ class CalendarPage extends StatefulWidget {
 }
 
 class CalendarState extends State<CalendarPage> {
-  DateTime _currentDate = DateTime(2021, 5, 17);
-  String _currentMonth = DateFormat.yMMM().format(DateTime(2021, 5, 17));
-  DateTime _targetDateTime = DateTime(2021, 5, 30);
+  DateTime _currentDate = DateTime(2021, 06, 14);
+  String _currentMonth = DateFormat.yMMM().format(DateTime(2021, 6, 14));
+  DateTime _targetDateTime = DateTime(2021, 6, 30);
   EventList<Event> _markedDateMap = new EventList<Event>(events: {
-    new DateTime(2021, 05, 19): [
+    new DateTime(2021, 06, 17): [
       new Event(
-        date: new DateTime(2021, 05, 19),
+        date: new DateTime(2021, 06, 17),
         title: 'Event 1',
         dot: Container(
           margin: EdgeInsets.symmetric(horizontal: 1.0),
@@ -29,12 +30,25 @@ class CalendarState extends State<CalendarPage> {
           width: 5.0,
         ),
       ),
-    ]
+    ],
+    new DateTime(2021, 06, 16): [
+      new Event(
+        date: new DateTime(2021, 06, 16),
+        title: 'Event 1',
+        dot: Container(
+          margin: EdgeInsets.symmetric(horizontal: 1.0),
+          color: Colors.red,
+          height: 5.0,
+          width: 5.0,
+        ),
+      ),
+    ],
   });
 
   @override
   void initState() {
     /// Add more events to _markedDateMap EventLis
+    getEvents();
   }
 
   @override
@@ -178,7 +192,59 @@ class CalendarState extends State<CalendarPage> {
 
               Container(
                 height: MediaQuery.of(context).size.height * 0.6,
-                child: ListView.builder(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('events')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else {
+                      return ListView(
+                        children: snapshot.data!.docs.map((doc) {
+                          // ignore: lines_longer_than_80_chars
+                          var string = DateTime.fromMicrosecondsSinceEpoch(
+                                  doc['date'].microsecondsSinceEpoch)
+                              .toString();
+                          return Container(
+                              width: 250,
+                              height: 80,
+                              child: Card(
+                                  child: Padding(
+                                padding: EdgeInsets.all(10),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          doc['title'],
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16),
+                                        ),
+                                        Text(
+                                            DateTime.fromMicrosecondsSinceEpoch(
+                                                    doc['date']
+                                                        .microsecondsSinceEpoch)
+                                                .toString())
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              )));
+                        }).toList(),
+                      );
+                    }
+                  },
+                ),
+                /* ListView.builder(
                     itemCount: 3,
                     itemBuilder: (context, index) {
                       return Card(
@@ -215,10 +281,29 @@ class CalendarState extends State<CalendarPage> {
                           ],
                         ),
                       ));
-                    }),
+                    }
+                    ),
+                    */
               ) //
             ],
           ),
         ));
+  }
+
+  getEvents() {
+    CollectionReference collectionReference =
+        FirebaseFirestore.instance.collection('events');
+    collectionReference.snapshots().listen((snapshots) {
+      setState(() {
+        print("data--");
+
+        print(snapshots.docs[0].data());
+        snapshots.docs.forEach((event) {
+          final obj = event.data();
+          print(obj);
+          // ignore: lines_longer_than_80_chars
+        });
+      });
+    });
   }
 }

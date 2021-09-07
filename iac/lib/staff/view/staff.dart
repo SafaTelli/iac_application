@@ -1,8 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iac/staff/cubit/cubit/staff_cubit.dart';
 import 'package:iac/widgets/drawer.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class StaffPage extends StatefulWidget {
   @override
@@ -75,11 +76,18 @@ class StaffStatee extends State<StaffPage> {
                     ),
                     Column(
                       children: [
-                        Icon(
-                          Icons.mail,
-                          color: Color(0xff919293),
+                        IconButton(
+                          icon: Icon(Icons.mail, color: Color(0xff919293)),
+                          onPressed: () {
+                            launch('mailto:${data[index].email}');
+                          },
                         ),
-                        Icon(Icons.phone, color: Color(0xff919293))
+                        IconButton(
+                          icon: Icon(Icons.phone, color: Color(0xff919293)),
+                          onPressed: () {
+                            launch('tel:+${data[index].tel}');
+                          },
+                        )
                       ],
                     )
                   ],

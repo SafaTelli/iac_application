@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:iac/data/models/actus.dart';
 import 'package:iac/data/models/event.dart';
 import 'package:iac/widgets/drawer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -74,65 +75,82 @@ class HomePageState extends State<HomePage> {
               ),
               Container(
                 height: MediaQuery.of(context).size.height * .35,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: events.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      width: 250,
-                      height: 150,
-                      child: Card(
-                        shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10),
-                                bottomLeft: Radius.circular(10),
-                                bottomRight: Radius.circular(10))),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(10.0)),
-                                child: Image.asset(
-                                  'images/cover.png',
-                                  fit: BoxFit.fill,
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(left: 5),
-                                child: Text(
-                                  events[index].date,
-                                  style: TextStyle(
-                                    color: Color(0xff386641),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(left: 5),
-                                child: Text(
-                                  events[index].title,
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.place,
-                                    color: Colors.grey,
-                                  ),
-                                  Text(
-                                    events[index].place,
-                                    style: TextStyle(color: Color(0xff386641)),
-                                  )
-                                ],
-                              )
-                            ]),
-                      ),
-                    );
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('events')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else {
+                      return ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: snapshot.data!.docs.map((doc) {
+                          // ignore: lines_longer_than_80_chars
+                          var string = DateTime.fromMicrosecondsSinceEpoch(
+                                  doc['date'].microsecondsSinceEpoch)
+                              .toString();
+                          return Container(
+                            width: 250,
+                            height: 150,
+                            child: Card(
+                              shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                      topRight: Radius.circular(10),
+                                      bottomLeft: Radius.circular(10),
+                                      bottomRight: Radius.circular(10))),
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(10.0)),
+                                      child: Image.network(
+                                        doc['cover'],
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 5),
+                                      child: Text(
+                                        string,
+                                        style: TextStyle(
+                                          color: Color(0xff386641),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 5),
+                                      child: Text(
+                                        doc['title'].toString(),
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.place,
+                                          color: Colors.grey,
+                                        ),
+                                        Text(
+                                          doc['place'].toString(),
+                                          style: TextStyle(
+                                              color: Color(0xff386641)),
+                                        )
+                                      ],
+                                    )
+                                  ]),
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    }
                   },
                 ),
               ),
@@ -158,6 +176,97 @@ class HomePageState extends State<HomePage> {
                 ),
               ),
               Container(
+                height: MediaQuery.of(context).size.height * .35,
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('actus')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else {
+                      return ListView(
+                        children: snapshot.data!.docs.map((doc) {
+                          // ignore: lines_longer_than_80_chars
+                          var string = DateTime.fromMicrosecondsSinceEpoch(
+                                  doc['date'].microsecondsSinceEpoch)
+                              .toString();
+                          return Container(
+                            width: 250,
+                            height: MediaQuery.of(context).size.height * .55,
+                            child: Card(
+                              shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(10),
+                                      topRight: Radius.circular(10),
+                                      bottomLeft: Radius.circular(10),
+                                      bottomRight: Radius.circular(10))),
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.all(5),
+                                      child: Row(
+                                        children: [
+                                          CircleAvatar(
+                                              radius: 30,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              backgroundImage: AssetImage(
+                                                  'images/logo.png')),
+                                          Padding(
+                                            padding: EdgeInsets.only(left: 5),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Le club',
+                                                  style: TextStyle(
+                                                      color: Color(0xff386641),
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                Text('Depuis 2 jours',
+                                                    style: TextStyle(
+                                                        color:
+                                                            Color(0xff707070)))
+                                              ],
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(10.0)),
+                                      child: Image.network(
+                                        doc['cover'],
+                                        width: double.infinity,
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 5),
+                                      child: Text(
+                                        doc['desc'].toString(),
+                                        style: TextStyle(
+                                          color: Color(0xff707070),
+                                        ),
+                                      ),
+                                    ),
+                                  ]),
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    }
+                  },
+                ),
+              ),
+              /*  Container(
                 height: MediaQuery.of(context).size.height * .65,
                 child: ListView.builder(
                   scrollDirection: Axis.vertical,
@@ -230,8 +339,21 @@ class HomePageState extends State<HomePage> {
                   },
                 ),
               )
+
+              */
             ],
           ),
         ));
+  }
+
+  fetchData() {
+    CollectionReference collectionReference =
+        FirebaseFirestore.instance.collection('staff');
+    collectionReference.snapshots().listen((snapshots) {
+      setState(() {
+        // print("data--");
+        // print(snapshots.docs[0].data());
+      });
+    });
   }
 }

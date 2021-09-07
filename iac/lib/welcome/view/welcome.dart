@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:iac/data/models/PushNotification.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import '../../routing_constants.dart';
 
@@ -10,6 +13,53 @@ class WelcomePage extends StatefulWidget {
 }
 
 class WelcomeState extends State<WelcomePage> {
+  String messageTitle = "Empty";
+  String notificationAlert = "alert";
+
+  // ignore: prefer_final_fields
+  late final FirebaseMessaging _messaging;
+  late PushNotification _notificationInfo;
+  late int _totalNotifications;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _totalNotifications = 0;
+    registerNotification();
+    FirebaseMessaging.instance
+        .getToken()
+        .then((value) => {print('token == ${value}')});
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      PushNotification notification = PushNotification(
+        title: message.notification?.title,
+        body: message.notification?.body,
+        // title: message.data['title'],
+        // body: message.data['body'],
+      );
+
+      setState(() {
+        _notificationInfo = notification;
+        _totalNotifications++;
+      });
+    });
+
+    /* FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage message) {
+      if (injector.get<AppPreferences>().isLoggedIn()) {
+        if (message != null) {
+          // Utils.showErrorToast("Notification clicked when app is terminated !");
+          if(message.notification != null) {
+            _handleMessageNotificationRedirection(message);
+          }
+        }
+      }
+    });
+*/
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,5 +173,44 @@ class WelcomeState extends State<WelcomePage> {
             ],
           ),
         ));
+  }
+
+  void registerNotification() async {
+    //...
+    // ignore: avoid_dynamic_calls
+    //await Firebase.initializeApp();
+
+    // 2. Instantiate Firebase Messaging
+    //_messaging = FirebaseMessaging.instance;
+
+    // 3. On iOS, this helps to take the user permissions
+    NotificationSettings settings =
+        await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      provisional: false,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+
+      // For handling the received notifications
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        print('notification here: ${message.messageId}');
+        // Parse the message received
+        PushNotification notification = PushNotification(
+          title: message.notification?.title,
+          body: message.notification?.body,
+        );
+
+        setState(() {
+          _notificationInfo = notification;
+          _totalNotifications++;
+        });
+      });
+    } else {
+      print('User declined or has not accepted permission');
+    }
   }
 }

@@ -145,6 +145,7 @@ class SignUpStatee extends State<SignUpPage> {
                     padding: EdgeInsets.all(5),
                     child: TextField(
                       autocorrect: true,
+                      obscureText: true,
                       controller: passwordTextEditController,
                       decoration: InputDecoration(
                         hintText: 'Mot de passe',
@@ -169,6 +170,7 @@ class SignUpStatee extends State<SignUpPage> {
                     child: TextField(
                       controller: confirmPasswordTextEditController,
                       autocorrect: true,
+                      obscureText: true,
                       decoration: InputDecoration(
                         hintText: 'Comfirmation du mot de passe',
                         hintStyle: TextStyle(color: Colors.grey),

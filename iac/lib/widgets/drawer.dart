@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iac/data/models/item_drawer.dart';
 import 'package:iac/routing_constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DrawaerPage extends StatefulWidget {
   @override
@@ -20,6 +21,18 @@ class DrawerState extends State<DrawaerPage> {
     ItemDrawer(name: 'PARAMETRES', image: 'param', selected: false),
     ItemDrawer(name: 'A PROPOS', image: 'about', selected: false)
   ];
+  late String name = "";
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getStringValuesSF("name").then((value) {
+      setState(() {
+        print("keyyyy" + value.toString());
+        this.name = value;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +54,7 @@ class DrawerState extends State<DrawaerPage> {
                   Padding(
                     padding: EdgeInsets.only(top: 10, bottom: 3),
                     child: Text(
-                      'Lorum Ipsum',
+                      name,
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold),
                     ),
@@ -129,5 +142,17 @@ class DrawerState extends State<DrawaerPage> {
         ],
       ),
     );
+  }
+
+  Future<String> getStringValuesSF(String key) async {
+    print("heeeere");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    //Return String
+    // print("keyy" + prefs.toString());
+
+    String stringValue = prefs.getString(key)!;
+    //print("keyy" + stringValue);
+    return stringValue;
   }
 }

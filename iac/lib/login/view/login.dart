@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iac/login/cubit/cubit/login_cubit.dart';
 import 'package:iac/routing_constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -33,7 +34,7 @@ class LoginStatee extends State<LoginPage> {
           ),
         ),
         body: BlocConsumer<LoginCubit, LoginState>(
-          listener: (context, state) {
+          listener: (context, state) async {
             if (state is LoadingState) {
               AlertDialog alert = AlertDialog(
                 content: new Row(
@@ -53,6 +54,8 @@ class LoginStatee extends State<LoginPage> {
                 },
               );
             } else if (state is LoginValid) {
+              addStringToSF("name", "Safa Telli");
+
               Navigator.of(context).pushNamed(HomeViewRoute);
             } else {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -109,6 +112,7 @@ class LoginStatee extends State<LoginPage> {
                     child: TextFormField(
                       controller: passwordController,
                       autocorrect: true,
+                      obscureText: true,
                       decoration: InputDecoration(
                         hintText: 'Mot de passe',
                         hintStyle: TextStyle(color: Colors.grey),
@@ -224,5 +228,10 @@ class LoginStatee extends State<LoginPage> {
             "There was an error logging in. Please try again later.";
       });
     }
+  }
+
+  addStringToSF(String value, String key) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(key, value);
   }
 }

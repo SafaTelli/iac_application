@@ -22,15 +22,18 @@ class StaffRepositoryFireStore extends StaffRepository {
         print('staffs');
         print(staffs);
         print(staffs.docs.length);
+        _loadedData.clear();
         staffs.docs.forEach((staff) {
           final obj = staff.data();
           print(obj);
           // ignore: lines_longer_than_80_chars
+
           _loadedData.add(Staff(
-            image: obj['image'],
-            name: obj['name'],
-            post: obj['post'],
-          ));
+              image: obj['image'],
+              name: obj['name'],
+              post: obj['post'],
+              tel: obj['tel'],
+              email: obj['email']));
         });
       });
     }
